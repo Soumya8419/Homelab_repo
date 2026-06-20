@@ -1,0 +1,31 @@
+services:
+  traefik:
+    image: traefik:v3.7
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"                  
+    security_opt:
+      - no-new-privileges:true
+      
+    ports:
+      - "80:80"
+      - "8080:8080"                                     
+
+  
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+
+    labels:
+      - "traefik.http.routers.traefik.rule=Host(`nucserver2.home.arpa`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.service=api@internal"
+    networks:
+      - web
+
+
+networks:
+  web:
+    external: false
