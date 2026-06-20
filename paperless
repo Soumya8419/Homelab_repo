@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  broker:
+    image: redis:8
+    container_name: paperless-broker
+    restart: unless-stopped
+    networks:
+      - paperless
+
+  db:
+    image: postgres:18
+    container_name: paperless-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    volumes:
+      - /mnt/ssd/paperless/db:/var/lib/postgresql
+    networks:
+      - paperless
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-webserver
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "8010:8000"
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: paperless
+      PAPERLESS_TIME_ZONE: Asia/Kolkata
+      USERMAP_UID: 1000
+      USERMAP_GID: 1000
+    volumes:
+      - /mnt/ssd/paperless/data:/usr/src/paperless/data
+      - /mnt/ssd/paperless/media:/usr/src/paperless/media
+      - /mnt/ssd/paperless/export:/usr/src/paperless/export
+      - /mnt/ssd/paperless/consume:/usr/src/paperless/consume
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.paperless.rule=Host(`paperless.nucserver2.home.arpa`)"
+      - "traefik.http.routers.paperless.entrypoints=web"
+      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
+    restart: unless-stopped
+    networks:
+      - paperless
+      - traefik
+
+networks:
+  paperless:
+    driver: bridge
+
+  traefik:
+    external: true
+    name: traefik_web
