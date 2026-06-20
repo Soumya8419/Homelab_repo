@@ -1,0 +1,21 @@
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    user: 1000:1000
+    ports:
+      - "4533:4533"
+    restart: unless-stopped
+    volumes:
+      - "/mnt/ssd/srv/dockerdata/navidrome/data:/data"
+      - "/mnt/ssd/torrent/Music:/music:ro"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.navidrome.rule=Host(`navidrome.nucserver2.home.arpa`)"
+      - "traefik.http.routers.navidrome.entrypoints=web"
+      - "traefik.http.services.navidrome.loadbalancer.server.port=4533"
+    networks:
+      - traefik
+networks:
+  traefik:
+    external: true
+    name: traefik_web
