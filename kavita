@@ -1,0 +1,25 @@
+services:
+  kavita:
+    image: lscr.io/linuxserver/kavita:latest
+    container_name: kavita
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    volumes:
+      - /mnt/ssd/srv/dockerdata/kavita/config:/config
+      - /mnt/ssd/srv/dockerdata/kavita/data:/data #optional
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kavita.rule=Host(`kavita.nucserver2.home.arpa`)"
+      - "traefik.http.routers.kavita.entrypoints=web"
+      - "traefik.http.services.kavita.loadbalancer.server.port=5000"
+    networks:
+      - traefik
+networks:
+  traefik:
+    external: true
+    name: traefik_web
