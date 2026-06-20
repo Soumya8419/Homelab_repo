@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+
+    environment:
+      - BASE_URL=https://search.example.com/
+
+    volumes:
+      - /mnt/ssd/srv/dockerdata/searxng:/etc/searxng
+
+    networks:
+      - web
+      - traefik
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_web"
+      - "traefik.http.routers.searxng.rule=Host(`search.nucserver2.home.arpa`)"
+      - "traefik.http.routers.searxng.entrypoints=web"
+      - "traefik.http.services.searxng.loadbalancer.server.port=8080"
+
+networks:
+  web:
+    external: false
+  traefik:
+    external: true
+    name: traefik_web
