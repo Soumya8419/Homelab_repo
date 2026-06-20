@@ -1,0 +1,24 @@
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    ports:
+      - 13378:80
+    volumes:
+      - /mnt/ssd/audiobookshelf/audiobooks:/audiobooks
+      - /mnt/ssd/audiobookshelf/podcasts:/podcasts
+      - /mnt/ssd/audiobookshelf/config:/config
+      - /mnt/ssd/audiobookshelf/metadata:/metadata
+    environment:
+      - TZ=Asia/Kolkata
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ab.rule=Host(`audiobookshelf.nucserver2.home.arpa`)"
+      - "traefik.http.routers.ab.entrypoints=web"
+      - "traefik.http.services.ab.loadbalancer.server.port=13378"
+    networks:
+      - traefik
+networks:
+  traefik:
+    external: true
+    name: traefik_web
