@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  excalidraw:
+    container_name: excalidraw
+    image: excalidraw/excalidraw:latest
+    ports:
+      - "3030:80"
+    restart: on-failure
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.excal.rule=Host(`excalidraw.nucserver2.home.arpa`)"
+      - "traefik.http.routers.excal.entrypoints=web"
+      - "traefik.http.services.excal.loadbalancer.server.port=5000"
+    networks:
+      - traefik
+networks:
+  traefik:
+    external: true
+    name: traefik_web
